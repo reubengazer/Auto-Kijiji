@@ -1,17 +1,17 @@
 # Auto-Kijiji 1.0.1
-#### Automatically post and re-post Kijiji ads to have your ads show at top of search listings for free.
 
-To successfully sell items or services on Kijiji, it is recommended to keep your posts on the front page as often as possible.
-This is much like Google SEO - ads that are more difficult to find are less successful.
+### Automatically post and re-post Kijiji ads to remain near on the front page
+![kijijilogo](autokijiji.jpg)
 
-Although there are paid options for keeping ads near the top/front (Kijiji's Top Ad, Highlight Ad, Home Gallery, etc) 
-I wanted a method of keeping my posts near the top that was both free and hassle-free.
+**To successfully sell items or services on Kijiji, it is recommended to keep your posts on the front page as often as possible.**  
+  
+Though there are paid options for keeping ads near the top/front, I wanted a method of keeping my posts near the top that was both free and hassle-free.
 
-Enter _AutoKijiji_ - a Python program that can be run on a timer (eg. cron) to upload your Kijiji ads in entirety. 
-The main function of AutoKijiji is not simply to _post_ ads but to _repost_ ads.
+Enter **_autokijiji_** - a command-line tool (or stand-alone Python program) that can be run on a timer (eg. cron) to post and re-post your Kijiji ads.  
 
-By _deleting_ a current ad and _reposting it_, it will turn up near the front of the pack. 
-Thus, AutoKijiji _deletes_ your ad(s) and immediately reposts them, pushing them to the top of the pile.
+**The main function of AutoKijiji is not simply to _post_ ads but to _repost_ ads.**
+
+By _deleting_ a current ad and _reposting it_, it will turn up near the front of the listing.
 
 This was built as a personal project to moderate my buying-and-reselling-of-camping-equipment side-business, and has been successful thus far!
 
@@ -28,14 +28,20 @@ This was built as a personal project to moderate my buying-and-reselling-of-camp
 Run `pip install selenium python-dotenv pathlib` to manually install all the dependencies
 
 ## Configure
+
 ### .env file + Browser Driver Path (Firefox, Chrome)  
-You need a .env file either passed as command line argument or in local directory by default.    
+
+You need a .env file either passed as command line argument or in local directory by default.   
+   
 This needs to contain just 1 line - the path to your BROWSER DRIVER.  
-Currently Auto-Kijiji supports Mozilla Firefox and Google Chrome browsers.   
+  
+Currently Auto-Kijiji supports Mozilla Firefox and Google Chrome browsers.  
+   
 _Note: You may ALSO include a phone_number (an optional input to a Kijiji ad)._
 
 ### Your Ads
-For Auto-Kijiji to work properly, you need to create 1 directory per advertisement on Kijiji. 
+For Auto-Kijiji to work properly, you need to create 1 directory per advertisement on Kijiji.  
+ 
 Inside of an "ad folder" you have 1 .json file which outlines the parameters of your advertisement, like:
 
 ```{
@@ -48,9 +54,9 @@ Inside of an "ad folder" you have 1 .json file which outlines the parameters of 
 }
 ```
 You may put as many images as necessary in the folder as well to upload with the ad (.jpg, .jpeg, .JPG, .png).  
-Then, keep each "ad folder" inside of a directory - it is this directory you will submit as a command line argument to *auto_kijiji*.  
+Then, keep each "ad folder" inside of a directory - it is this directory you will submit as a command line argument to *autokijiji*.  
 
-As an example, the directory you point *auto_kijiji* to could look like this:
+As an example, the directory you point *autokijiji* to could look like this:
 ```
 /ad_files/
     /tent/
@@ -67,4 +73,4 @@ For **Mozilla** you can [download the driver here](https://github.com/mozilla/ge
 For **Chrome** you can [download the driver here](https://chromedriver.chromium.org/downloads).   
 
 ## Try out
-`auto_kijiji --ads_dir ./ad_files --env_path ./.env `
+`autokijiji --ads_dir ./ad_files --env_path ./.env `
