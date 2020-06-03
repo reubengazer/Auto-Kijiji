@@ -1,9 +1,9 @@
 # Auto-Kijiji 1.0.1
 
-### Automatically post and re-post Kijiji ads to remain near on the front page
+### Automatically post and re-post Kijiji ads to remain on the front page
 ![kijijilogo](autokijiji.jpg)
 
-**To successfully sell items or services on Kijiji, it is recommended to keep your posts on the front page as often as possible.**  
+**To successfully sell items or services on Kijiji, keep your posts on the front page as often as possible!**  
   
 Though there are paid options for keeping ads near the top/front, I wanted a method of keeping my posts near the top that was both free and hassle-free.
 
@@ -31,18 +31,37 @@ Run `pip install selenium python-dotenv pathlib` to manually install all the dep
 
 ### .env file + Browser Driver Path (Firefox, Chrome)  
 
-You need a .env file either passed as command line argument or in local directory by default.   
-   
-This needs to contain just 1 line - the path to your BROWSER DRIVER.  
+You need 1 .env file, which contains at least 1 item - the path to your BROWSER DRIVER.  
+
+Find your driver:
+- for **Mozilla** you can [download the driver here](https://github.com/mozilla/geckodriver/releases) 
+- for **Chrome** you can [download the driver here](https://chromedriver.chromium.org/downloads) 
+
+If this .env file *is not* in your local directory it must be passed as a command-line argument (--env_path) after *autokijiji* like:
+
+```
+autokijiji --env_path /path/to/my/.env
+```
   
-Currently Auto-Kijiji supports Mozilla Firefox and Google Chrome browsers.  
+Currently Auto-Kijiji supports **Mozilla Firefox** and **Google Chrome** browsers. 
    
-_Note: You may ALSO include a phone_number (an optional input to a Kijiji ad)._
+**Note**: You may ALSO include a phone_number (str) in the .env file (an optional input to a Kijiji ad).
+
+An example .env file might look like this:
+
+```
+# .env file for Auto-Kijiji
+browser_driver_path='/path/to/my/driver'
+phone_number='9056162285'
+```
+
+## Logging In to Kijiji
+Auto-Kijiji assumes you are already logged in via your browser, and grabs your browser profile to login to your Kijiji account. 
+Auto-Kijiji currently does not perform any auth-like procedures but for checking your User's browser profile (.default file).
 
 ### Your Ads
-For Auto-Kijiji to work properly, you need to create 1 directory per advertisement on Kijiji.  
- 
-Inside of an "ad folder" you have 1 .json file which outlines the parameters of your advertisement, like:
+For Auto-Kijiji to work properly, you need to create 1 directory per advertisement on Kijiji. 
+Each ad is a .json dictionary and looks something like this:  
 
 ```
 {
@@ -54,10 +73,10 @@ Inside of an "ad folder" you have 1 .json file which outlines the parameters of 
   "image_fps": ["mybootphoto.JPG"]
 }
 ```
-You may put as many images as necessary in the folder as well to upload with the ad (.jpg, .jpeg, .JPG, .png).  
-Then, keep each "ad folder" inside of a directory - it is this directory you will submit as a command line argument to *autokijiji*.  
+Drop this file into a folder, along with any images you'd like to upload (.jpg, .jpeg, .JPG, .png).  
+Then, stick this "ad folder" inside of a directory (your /ad_files/ or /ads/ folder) - it is this directory you will submit as a command line argument to *autokijiji*.  
 
-As an example, the directory you point *autokijiji* to could look like this:
+As an example, the directory you point *autokijiji* to could contain two items: a tent, and a campstove:
 ```
 /ad_files/
     /tent/
@@ -68,10 +87,13 @@ As an example, the directory you point *autokijiji* to could look like this:
         campstove.json
         campstove_pic.png
         campstove_top.jpg
-```    
-  
-For **Mozilla** you can [download the driver here](https://github.com/mozilla/geckodriver/releases).  
-For **Chrome** you can [download the driver here](https://chromedriver.chromium.org/downloads).   
+        rust_spot.png
+```       
+Inside /ad_files/ are two directories - each with 1 .json and some number of images.
 
-## Try out
-`autokijiji --ads_dir ./ad_files --env_path ./.env `
+## Try it out
+Assuming you have your ads as listed above in a local directory called */ad_files/*, as well as a local .env with the path to my browser driver,  
+
+```
+autokijiji --ads_dir ./ad_files --env_path ./.env 
+```
