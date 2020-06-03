@@ -44,7 +44,8 @@ For Auto-Kijiji to work properly, you need to create 1 directory per advertiseme
  
 Inside of an "ad folder" you have 1 .json file which outlines the parameters of your advertisement, like:
 
-```{
+```
+{
   "category_id":"656",
   "title": "A cool pair of hiking boots!",
   "price": "100",
