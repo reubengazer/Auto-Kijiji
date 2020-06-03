@@ -5,15 +5,17 @@
 
 **To successfully sell items or services on Kijiji, keep your posts on the front page as often as possible!**  
   
-Though there are paid options for keeping ads near the top/front, I wanted a method of keeping my posts near the top that was both free and hassle-free.
+Though there are paid options for keeping ads at the top, I wanted a method of doing so that was both free and easy.
 
-Enter **_autokijiji_** - a command-line tool (or stand-alone Python program) that can be run on a timer (eg. cron) to post and re-post your Kijiji ads.  
+Enter **_autokijiji_** - a command-line tool (or stand-alone Python program) to post and re-post your Kijiji ads.
 
 **The main function of AutoKijiji is not simply to _post_ ads but to _repost_ ads.**
 
 By _deleting_ a current ad and _reposting it_, it will turn up near the front of the listing.
 
-This was built as a personal project to moderate my buying-and-reselling-of-camping-equipment side-business, and has been successful thus far!
+**_autokijiji_** can be executed on a timer (eg. cron) to re-post your ads daily or weekly.  
+
+This is a personal project to moderate my buying-and-reselling-of-camping-equipment, and has been successful thus far!
 
 - Reuben S. Gazer (2020)
 
@@ -59,7 +61,7 @@ phone_number='9056162285'
 Auto-Kijiji assumes you are already logged in via your browser, and grabs your browser profile to login to your Kijiji account. 
 Auto-Kijiji currently does not perform any auth-like procedures but for checking your User's browser profile (.default file).
 
-### Your Ads
+## Your Ads
 For Auto-Kijiji to work properly, you need to create 1 directory per advertisement on Kijiji. 
 Each ad is a .json dictionary and looks something like this:  
 
