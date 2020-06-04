@@ -9,7 +9,7 @@ Though there are paid options for keeping ads at the top, I wanted a method of d
 
 Enter **_autokijiji_** - a command-line tool (or stand-alone Python program) to post and re-post your Kijiji ads.
 
-**The main function of AutoKijiji is not simply to _post_ ads but to _repost_ ads.**
+> **The main function of _autokijiji_ is not simply to _post_ ads but to _repost_ ads.**
 
 By _deleting_ a current ad and _reposting it_, it will turn up near the front of the listing.
 
@@ -57,17 +57,19 @@ browser_driver_path='/path/to/my/driver'
 phone_number='9056162285'
 ```
 
-## Logging In to Kijiji
-Auto-Kijiji assumes you are already logged in via your browser, and grabs your browser profile to login to your Kijiji account. 
+## Example: Let's Sell Some Hiking Boots!
+
+### Logging In to Kijiji
+Auto-Kijiji assumes you are already logged in via your browser, and grabs your browser profile to login to your Kijiji account.   
 Auto-Kijiji currently does not perform any auth-like procedures but for checking your User's browser profile (.default file).
 
-## Your Ads
-For Auto-Kijiji to work properly, you need to create 1 directory per advertisement on Kijiji. 
-Each ad is a .json dictionary and looks something like this:  
+### Your Ads
+For Auto-Kijiji to work properly, each of your ads must be a DIRECTORY.
+Each of these directories (ads) must contain 1 .json file containing your ad information, like this:  
 
 ```
 {
-  "category_id":"656",
+  "category_id":"286",
   "title": "A cool pair of hiking boots!",
   "price": "100",
   "description": "A pair of boots that has been worn once. \nGreat grip on the bottom and waterproof.",
@@ -75,27 +77,24 @@ Each ad is a .json dictionary and looks something like this:
   "image_fps": ["mybootphoto.JPG"]
 }
 ```
-Drop this file into a folder, along with any images you'd like to upload (.jpg, .jpeg, .JPG, .png).  
-Then, stick this "ad folder" inside of a directory (your /ad_files/ or /ads/ folder) - it is this directory you will submit as a command line argument to *autokijiji*.  
+You can also add any images to the directory you'd like to upload (.jpg, .jpeg, .JPG, .png currently supported).  
 
-As an example, the directory you point *autokijiji* to could contain two items: a tent, and a campstove:
+Here is the directory contents of the example ad contained in this repo:
 ```
-/ad_files/
-    /tent/
-        tent.json
-        tent_from_side.jpg
-        tent_from_front.jpg
-    /campstove/
-        campstove.json
-        campstove_pic.png
-        campstove_top.jpg
-        rust_spot.png
+/scarpa_hiking_boots/
+    hikingboots.json
+    mybootphoto.JPG
 ```       
-Inside /ad_files/ are two directories - each with 1 .json and some number of images.
 
 ## Try it out
-Assuming you have your ads as listed above in a local directory called */ad_files/*, as well as a local .env with the path to my browser driver,  
+Assuming your env is in the local directory (with path to your browser driver), let's post the hiking boots:  
 
 ```
-autokijiji --ads_dir ./ad_files --env_path ./.env 
+autokijiji --ads ./scarpa_hiking_boots 
+```
+
+**Uploading Multiple Ads**: Simply pass in multiple arguments for --ad_dirs:
+
+```
+autokijiji --ads ./scarpa_hiking_boots ./vintage_campstove ./fishing_rods
 ```

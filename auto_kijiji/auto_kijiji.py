@@ -12,21 +12,32 @@ from selenium.webdriver.firefox.webdriver import FirefoxProfile
 # Env
 from dotenv import load_dotenv
 
+# TODO: Use manual login if user doesn't want to use browser profile / saved logins
+# TODO: Find better way of setting the phone number for the ad
+# TODO: make kijiji links stored in a kijiji_base_links file
+# TODO: create better way to store path to the browser_driver. Maybe a config step?
+# TODO: gather map of category_id codes and category names for Kijiji so users don't have to manually do it
+# TODO: Change all time.sleep() commands to explicit waits (with conditions) in Selenium
+# TODO: Make Selenium begin faster!
+# TODO: code in explicit wait after loading post-ad url to look for the postad-title box! Failed in tests.
+# TODO: change the input to be single ad directories instead of a directory OF ad folders
 
 class AutoKijiji:
 
-    def __init__(self, ads_dir: str, env_path='./.env', browser='firefox', in_background=False, delete_first=True):
+    def __init__(self, ads: list, env_path='./.env', browser='firefox', in_background=False, delete_first=True):
         """
-        Auto-Kijiji: automatically re-post Kijiji ads so you don't have to.
+        Auto-Kijiji: automatically post and re-post Kijiji ads to stay at the top of the listings.
 
-        After some time, your Kijiji ad is no longer "recent enough" in your
-        posting category to lie on the front page. Whenever I'm selling on Kijiji,
-        I want to keep my ads on the front page FOR FREE without paying the Kijiji
-        promotionals to "keep it at the top". To do this, you simply have this file run
-        on some schedule (say, every 2 days) to remove the ad from Kijiji, then re-post it.
+        After some time, your Kijiji ad is no longer "recent enough" in your posting category
+        to lie on the front page. Whenever I sell items on Kijiji, I want my ads on
+        the front page FOR FREE without paying the Kijiji promotionals to "keep it at the top".
+        To do this, you simply have to delete your ad, and re-post it. This is what Auto-Kijiji does!
+        You may run this through the command-line manually (as a bash command) on a schedule.
 
-        :param browser: the browser you'd like to use to launch AutoKijiji. One of: ['firefox', 'chrome]
-        :param ad_dir: absolute path to directory where json ads (and images) reside
+        :param env_path: path to .env file which holds the path to the browser driver
+        :param ads: list of absolute paths to ad folder(s)
+        :param browser: the browser you'd like to use to launch AutoKijiji - ['firefox', 'chrome]
+        :param in_background: whether to run this in the background (if not, will open and control browser in real-time)
         :param delete_if_active: delete the ad if it's already valid before (re)posting
             - you may want to keep this True, as posting duplicate Kijiji ads CAN get you banned in some circumstances.
         """
@@ -38,7 +49,7 @@ class AutoKijiji:
         self.driver = self.start_driver(in_background=in_background)
         self.post_ad_url = 'https://www.kijiji.ca/p-admarkt-post-ad.html?'
         self.my_ads_url = 'https://www.kijiji.ca/m-my-ads/active'
-        self.ads_dir = os.path.abspath(ads_dir)
+        self.ad_dirs = [os.path.abspath(dir) for dir in ads]
         self.delete_first = delete_first
         self.ads = self.create_ads()
         self.phone = os.getenv("phone_number")
@@ -99,18 +110,19 @@ class AutoKijiji:
         return driver
 
     def create_ads(self) -> list:
-        """Create Ad objects out of the ads inside self.ads_dir
+        """Create Ad objects out of the ads inside self.ad_dirs
 
         Each ad should be a SINGLE FOLDER containing:
             - 1 .json that outlines the actual "meat" of your advertisement (title, description, price, etc)
-                - see ad_template.json.json for what this dictionary should look like
+                - see hikingboots.json.json for what this dictionary should look like
             - any # of .png, .jpg, or .JPG images which will be uploaded as images for the advertisement
         """
 
         list_of_ads = []
-        for dir in os.listdir(self.ads_dir):
+
+        for ad_dir in self.ad_dirs:
             # Grab .json and create the Ad instance.
-            ad_json = [f for f in os.listdir(os.path.join(self.ads_dir, dir)) if f.endswith('.json')]
+            ad_json = [f for f in os.listdir(ad_dir) if f.endswith('.json')]
 
             if len(ad_json) == 0:
                 print("Did not find .json file in 1 or more ad folders.")
@@ -118,11 +130,11 @@ class AutoKijiji:
             else:
                 ad_json = ad_json[0]
 
-            with open(os.path.join(self.ads_dir, dir, ad_json), 'r') as f:
+            with open(os.path.join(ad_dir, ad_json), 'r') as f:
                 ad = Ad(**json.load(f))
 
                 # Add image filepaths as attributes.
-                img_fps = [os.path.join(self.ads_dir, dir, file) for file in os.listdir(os.path.join(self.ads_dir, dir))
+                img_fps = [os.path.join(ad_dir, file) for file in os.listdir(os.path.join(ad_dir))
                            if file.endswith('jpg')
                            or file.endswith('jpeg')
                            or file.endswith('JPG')
@@ -198,7 +210,7 @@ class AutoKijiji:
         delete_buttons = self.driver.find_elements_by_xpath("//button[@data-qa-id='adDeleteButton']")
         for delete_button in delete_buttons:
             delete_button.click()
-            time.sleep(5)
+            time.sleep(2)
 
     def post_ad(self, ad: Ad):
         """Post a single ad on the Kijiji site."""

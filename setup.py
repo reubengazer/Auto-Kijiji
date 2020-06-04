@@ -2,6 +2,8 @@
 from setuptools import setup
 import sys
 
+# TODO: finish
+
 if sys.version_info[0] < 3: raise Exception("Sorry, you must use Python 3")
 
 # Helper method that will parse __init__.py to extract VERSION
