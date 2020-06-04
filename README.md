@@ -21,53 +21,80 @@ This is a personal project to moderate my buying-and-reselling-of-camping-equipm
 
 ## Install
 ### Manually
-   ```bash
-   git clone https://github.com/reubengazer/Auto-Kijiji.git
-   cd Auto-Kijiji
-   python3 setup.py install
-   ```
-**Dependencies: selenium, python-dotenv, pathlib**  
-Run `pip install selenium python-dotenv pathlib` to manually install all the dependencies
+
+```bash
+git clone https://github.com/reubengazer/Auto-Kijiji.git
+cd Auto-Kijiji
+python3 setup.py install
+```
+
+Then, setup your config.yaml file (more on this below):
+
+```bash
+autokijiji --init
+```
+
+**Dependencies: selenium, python-dotenv, pathlib, numpy**  
+Run `pip install selenium python-dotenv pathlib numpy` to manually install all the dependencies
 
 ## Configure
 
-### .env file + Browser Driver Path (Firefox, Chrome)  
+### config.yaml
 
-You need 1 .env file, which contains at least 1 item - the path to your BROWSER DRIVER.  
+*autokijiji* needs to point to a config.yaml file which contains:
 
-Find your driver:
+- base kijiji urls for posting ads and viewing your active ads (included by default)
+- the path to your browser driver
+- [optional] your phone number (optional to post with ad, your Kijiji profile doesn't save the phone-number)
+- [optional] your preferred browser in which to deploy auto_kijiji
+
+To download the driver for your browser:
+
 - for **Mozilla** you can [download the driver here](https://github.com/mozilla/geckodriver/releases) 
 - for **Chrome** you can [download the driver here](https://chromedriver.chromium.org/downloads) 
 
-If this .env file *is not* in your local directory it must be passed as a command-line argument (--env_path) after *autokijiji* like:
+**Easiest way to define config.yaml**: simply run autokijiji with --init:
 
+```bash
+autokijiji --config /path/to/my/config.yaml
 ```
-autokijiji --env_path /path/to/my/.env
+
+Optionally, you may create your own and pass it in as a command-line argument (--config) on the fly:
+
+```bash
+autokijiji --config myconfig.yaml --ads ./some-item-to-sell
+```
+
+The config.yaml file looks like this:
+
+```yaml
+kijiji_post_ad_url : https://www.kijiji.ca/p-admarkt-post-ad.html?
+kijiji_my_ads_url : https://www.kijiji.ca/m-my-ads/active
+phone_number : 2897007082
+preferred_browser : firefox
+browser_driver_path : /path/to/your/browser/driver
 ```
   
-Currently Auto-Kijiji supports **Mozilla Firefox** and **Google Chrome** browsers. 
-   
-**Note**: You may ALSO include a phone_number (str) in the .env file (an optional input to a Kijiji ad).
-
-An example .env file might look like this:
-
-```
-# .env file for Auto-Kijiji
-browser_driver_path='/path/to/my/driver'
-phone_number='9056162285'
-```
-
 ## Example: Let's Sell Some Hiking Boots!
 
 ### Logging In to Kijiji
 Auto-Kijiji assumes you are already logged in via your browser, and grabs your browser profile to login to your Kijiji account.   
 Auto-Kijiji currently does not perform any auth-like procedures but for checking your User's browser profile (.default file).
 
-### Your Ads
-For Auto-Kijiji to work properly, each of your ads must be a DIRECTORY.
-Each of these directories (ads) must contain 1 .json file containing your ad information, like this:  
+### Storing Your Ad Content
+For Auto-Kijiji to work properly, each ad must be represented by a DIRECTORY.
+Each of these directories (ads) must contain 1 .json file containing your ad information and any number of images, like this:  
 
-```
+```bash
+# Example directory of some boots I'm selling
+/scarpa_hiking_boots/
+    hikingboots.json
+    mybootphoto.JPG
+```  
+
+Your ad content is contained in the .json file and must look like this:
+
+```json
 {
   "category_id":"286",
   "title": "A cool pair of hiking boots!",
@@ -77,24 +104,28 @@ Each of these directories (ads) must contain 1 .json file containing your ad inf
   "image_fps": ["mybootphoto.JPG"]
 }
 ```
-You can also add any images to the directory you'd like to upload (.jpg, .jpeg, .JPG, .png currently supported).  
 
-Here is the directory contents of the example ad contained in this repo:
-```
-/scarpa_hiking_boots/
-    hikingboots.json
-    mybootphoto.JPG
-```       
+Image types currently supported are .jpg/.jpeg/.JPG and .png.  
 
 ## Try it out
-Assuming your env is in the local directory (with path to your browser driver), let's post the hiking boots:  
+Assuming you've set the config.yaml file (if not, see above) let's post the example ad contained in the repo (hiking boots):  
 
-```
-autokijiji --ads ./scarpa_hiking_boots 
+```bash
+autokijiji --ads ./example_ad_hiking_boots 
 ```
 
 **Uploading Multiple Ads**: Simply pass in multiple arguments for --ad_dirs:
 
+```bash
+autokijiji --ads ./example_ad_hiking_boots ./vintage_campstove ./fishing_rods
 ```
-autokijiji --ads ./scarpa_hiking_boots ./vintage_campstove ./fishing_rods
-```
+
+## Command-Line Arguments
+
+--init -> initialize config.yaml  
+--ads -> directory or directories of your ads to post  
+--delete_first -> whether to delete your ad before re-posting it (default: True)  
+--browser -> the browser you'd like to deploy ('firefox' or 'chrome')  
+--background -> whether to run this in the background (default: True)  
+--config -> manually submit a config.yaml file that isn't setup from --init  
+--version, -v -> print your current version of *auto_kijiji*  

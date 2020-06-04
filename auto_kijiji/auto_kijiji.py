@@ -3,28 +3,27 @@ import json
 import sys
 import time
 import platform
+import yaml
+import numpy as np
+
 # Custom class for an advertisement (Ad)
 from auto_kijiji.ad import Ad
 # selenium imports
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.webdriver import FirefoxProfile
-# Env
-from dotenv import load_dotenv
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # TODO: Use manual login if user doesn't want to use browser profile / saved logins
-# TODO: Find better way of setting the phone number for the ad
-# TODO: make kijiji links stored in a kijiji_base_links file
-# TODO: create better way to store path to the browser_driver. Maybe a config step?
 # TODO: gather map of category_id codes and category names for Kijiji so users don't have to manually do it
 # TODO: Change all time.sleep() commands to explicit waits (with conditions) in Selenium
 # TODO: Make Selenium begin faster!
-# TODO: code in explicit wait after loading post-ad url to look for the postad-title box! Failed in tests.
-# TODO: change the input to be single ad directories instead of a directory OF ad folders
 
 class AutoKijiji:
 
-    def __init__(self, ads: list, env_path='./.env', browser='firefox', in_background=False, delete_first=True):
+    def __init__(self, ads: list, config=None, browser='firefox', in_background=False, delete_first=True):
         """
         Auto-Kijiji: automatically post and re-post Kijiji ads to stay at the top of the listings.
 
@@ -34,27 +33,33 @@ class AutoKijiji:
         To do this, you simply have to delete your ad, and re-post it. This is what Auto-Kijiji does!
         You may run this through the command-line manually (as a bash command) on a schedule.
 
-        :param env_path: path to .env file which holds the path to the browser driver
+        :param config: path to config.yaml (default: install folder / config.yaml) file which holds the path to the browser driver
         :param ads: list of absolute paths to ad folder(s)
         :param browser: the browser you'd like to use to launch AutoKijiji - ['firefox', 'chrome]
         :param in_background: whether to run this in the background (if not, will open and control browser in real-time)
         :param delete_if_active: delete the ad if it's already valid before (re)posting
             - you may want to keep this True, as posting duplicate Kijiji ads CAN get you banned in some circumstances.
         """
-        # Set environment file.
-        load_dotenv(dotenv_path=env_path)
+        # Load configuration file.
+        with open(config) as f:
+            data = yaml.load(f)
+
         self.browser=browser
         self.browser_profile_path = self.get_browser_profile()
-        self.browser_driver_path = os.getenv("browser_driver_path")  # see README.md for download links to drivers
+        self.browser_driver_path = data['browser_driver_path']  # see README.md for download links to drivers
+        # Check if the config.yaml file has been updated from the default:
+        if self.browser_profile_path == '/path/to/your/browser/driver':
+            print("config.yaml file does not have the path to the browser driver.")
+            print("Go edit your config.yaml file (default saved to: ~.auto_kijiji/config.yaml")
         self.driver = self.start_driver(in_background=in_background)
-        self.post_ad_url = 'https://www.kijiji.ca/p-admarkt-post-ad.html?'
-        self.my_ads_url = 'https://www.kijiji.ca/m-my-ads/active'
+        self.post_ad_url = data['kijiji_post_ad_url']
+        self.my_ads_url = data['kijiji_my_ads_url']
         self.ad_dirs = [os.path.abspath(dir) for dir in ads]
         self.delete_first = delete_first
         self.ads = self.create_ads()
-        self.phone = os.getenv("phone_number")
+        self.phone = data['phone_number']
 
-        if self.delete_first == True:
+        if self.delete_first:
             self.delete_ads()
 
     def get_browser_profile(self) -> str:
@@ -67,19 +72,33 @@ class AutoKijiji:
         profile_path = None
 
         if self.browser=='firefox':
+
             if plat=='Linux':
-                profile_path = os.path.join('/home/', f'{os.getlogin()}', '.mozilla/firefox/')
+                profile_path = os.path.join('/home/',
+                                            f'{os.getlogin()}',
+                                            '.mozilla/firefox/')
             elif plat=='Darwin':
-                profile_path = os.path.join('/Users/', f'{os.getlogin()}', '/Library/Application Support/Firefox/Profiles/')
+                profile_path = os.path.join('/Users/',
+                                            f'{os.getlogin()}',
+                                            '/Library/Application Support/Firefox/Profiles/')
             elif plat=='Windows':
-                profile_path = os.path.join('\\Users\\', f'{os.getlogin()}', '\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\')
+                profile_path = os.path.join('\\Users\\',
+                                            f'{os.getlogin()}',
+                                            '\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\')
         elif self.browser=='chrome':
+
             if plat=='Linux':
-                profile_path = os.path.join('/home/', f'{os.getlogin()}', '.mozilla/firefox/')
+                profile_path = os.path.join('/home/',
+                                            f'{os.getlogin()}',
+                                            '/.config/google-chrome/default')
             elif plat=='Darwin':
-                profile_path = os.path.join('/Users/', f'{os.getlogin()}', '/Library/Application Support/Firefox/Profiles/')
+                profile_path = os.path.join('Users/',
+                                            f'{os.getlogin()}',
+                                            '/Library/Application Support/Google/Chrome/Default')
             elif plat=='Windows':
-                profile_path = os.path.join('\\Users\\', f'{os.getlogin()}', '\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\')
+                profile_path = os.path.join('C:\\Users\\',
+                                            f'{os.getlogin()}',
+                                            '\\AppData\\Local\\Google\\Chrome\\User Data\\Default')
         else:
             print("Browser argument not recognized. Must be one of: ['firefox', 'chrome'].")
             sys.exit()
@@ -87,7 +106,7 @@ class AutoKijiji:
         browser_profile_path = os.path.join(profile_path, [f for f in os.listdir(profile_path) if f.endswith('.default')][0])
         return browser_profile_path
 
-    def start_driver(self, in_background=False, implicit_wait_time=3):
+    def start_driver(self, in_background=False, implicit_wait_time=4):
         """
         Start the selenium web-driver.
         :return: the selenium web-driver object, from which you will find elements, click things, etc.
@@ -159,22 +178,34 @@ class AutoKijiji:
         self.fill_price(ad.price)
         self.fill_phone(self.phone)
 
+    def sleep_randomly(self, low=1, high=8):
+        """Make the driver wait a random number of seconds between low and high.
+        A simple layer to potentially avoid being caught as a bot."""
+        time.sleep(np.random.randint(low, high))
+
     def fill_title(self, title: str):
-        """Submit title of ad."""
-        title_box = self.driver.find_element_by_id('postad-title')
+        """Submit title of ad.
+        Since this is the first part of form-filling, we perform an explicit Wait for this element to appear.
+        """
+        title_box = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "postad-title"))
+        )
         title_box.click()
         title_box.send_keys(title)
 
     def fill_description(self, description: str):
         """Submit the description of the ad."""
-        description_box = self.driver.find_element_by_id('pstad-descrptn')
+        description_id = 'pstad-descrptn'
+        description_box = self.driver.find_element_by_id(description_id)
         description_box.click()
         description_box.send_keys(description)
 
     def fill_tags(self, tags: list):
         """Submit tags of ad."""
-        tag_box = self.driver.find_element_by_id('pstad-tagsInput')
-        enter_button = self.driver.find_element_by_class_name('addButton-1154397290')
+        tag_id = 'pstad-tagsInput'
+        tag_box = self.driver.find_element_by_id(tag_id)
+        enter_button_class = 'addButton-1154397290'
+        enter_button = self.driver.find_element_by_class_name(enter_button_class)
         for tag in tags:
             tag_box.send_keys(tag)
             enter_button.click()
@@ -185,21 +216,23 @@ class AutoKijiji:
             self.driver.find_element_by_xpath("//input[@type='file']").send_keys(image_fp)
         # Since it takes a bit for the photos to upload, sleep for a few seconds.
         # TODO: Should create explicit wait condition in Selenium
-        time.sleep(30)
+        time.sleep(20)
 
     def fill_price(self, price: str):
         """Submit price of the ad."""
-        price_box = self.driver.find_element_by_id('PriceAmount')
+        price_id = 'PriceAmount'
+        price_box = self.driver.find_element_by_id(price_id)
         price_box.click()
         price_box.send_keys(price)
 
     def fill_phone(self, phone: str):
         """Submit phone number for the ad."""
-        phone_box = self.driver.find_element_by_id('PhoneNumber')
+        phone_id = 'PhoneNumber'
+        phone_box = self.driver.find_element_by_id(phone_id)
         phone_box.click()
         phone_box.send_keys(phone)
 
-    def submit_ad(self):
+    def submit(self):
         """Click to submit the ad finally."""
         submission_button = self.driver.find_element_by_xpath("//button[@type='submit']")
         submission_button.click()
@@ -216,5 +249,6 @@ class AutoKijiji:
         """Post a single ad on the Kijiji site."""
         self.go_to_post_page(ad)
         self.fill_ad(ad)
-        self.submit_ad()
-        time.sleep(5)
+        self.submit()
+        self.sleep_randomly()
+

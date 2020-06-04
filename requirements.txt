@@ -1,3 +1,4 @@
 python-dotenv
 selenium
 pathlib
+numpy

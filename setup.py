@@ -24,7 +24,7 @@ setup(
     name                =   'Auto-Kijiji',
     description         =   "Automatically post and re-post Kijiji top keep ads at the top of the list for free.",
     url                 =   'https://github.com/reubengazer/Auto-Kijiji',
-    install_requires    =   ['selenium','pathlib','python-dotenv'],
+    install_requires    =   ['selenium','pathlib','python-dotenv', 'numpy'],
     version             =   parse_setup('VERSION'),
     packages            =   ['auto_kijiji'],
     entry_points        =   {'console_scripts': ['autokijiji = auto_kijiji.launcher:main'],},
