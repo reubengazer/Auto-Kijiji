@@ -23,7 +23,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class AutoKijiji:
 
-    def __init__(self, ads: list, config=None, browser='firefox', in_background=False, delete_first=True):
+    def __init__(self, ads: list, config=None, browser='firefox', in_background=False, dont_delete=False):
         """
         Auto-Kijiji: automatically post and re-post Kijiji ads to stay at the top of the listings.
 
@@ -37,7 +37,7 @@ class AutoKijiji:
         :param ads: list of absolute paths to ad folder(s)
         :param browser: the browser you'd like to use to launch AutoKijiji - ['firefox', 'chrome]
         :param in_background: whether to run this in the background (if not, will open and control browser in real-time)
-        :param delete_if_active: delete the ad if it's already valid before (re)posting
+        :param dont_delete: dont delete the ad if it's already valid before (re)posting
             - you may want to keep this True, as posting duplicate Kijiji ads CAN get you banned in some circumstances.
         """
         # Load configuration file.
@@ -55,11 +55,11 @@ class AutoKijiji:
         self.post_ad_url = data['kijiji_post_ad_url']
         self.my_ads_url = data['kijiji_my_ads_url']
         self.ad_dirs = [os.path.abspath(dir) for dir in ads]
-        self.delete_first = delete_first
+        self.dont_delete = dont_delete
         self.ads = self.create_ads()
         self.phone = data['phone_number']
 
-        if self.delete_first:
+        if not self.dont_delete:
             self.delete_ads()
 
     def get_browser_profile(self) -> str:

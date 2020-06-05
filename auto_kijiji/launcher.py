@@ -8,7 +8,7 @@ def parse_args():
     parser.add_argument('--init', action='store_true', help="""Create config.yaml file if doesn't exist and open with default text editor.""")
     parser.add_argument('--update_config', action='store_true', help="""Update your config.yaml file found in the install directory.""")
     parser.add_argument('--ads', metavar='Ads directory or directories', action='append', nargs='+', help="""The directory/directories of your ads (an ad: 1 directory with a .json file representing the ad content, and any images (.png, .jpg/.jpeg/.JPG)""")
-    parser.add_argument('--delete_first', action='store_true', help="""Whether to delete the ads first before re-posting (default True).""")
+    parser.add_argument('--dont_delete', action='store_true', help="""Whether to delete the ads first before re-posting (default True).""")
     parser.add_argument('--browser', default='firefox', metavar='Browser', help="""The browser through which to post. Options are 'firefox' or 'chrome'.""")
     parser.add_argument('--background', action='store_true', help="""Whether to run the script in the background or not (if not, will open browser in front of you while posting).""")
     parser.add_argument('--config', metavar='Config file (yaml)', help="""The script must point to a config.yaml file which contains the path to the browser driver.""")
@@ -58,7 +58,7 @@ def main():
                     config=config_filepath,
                     browser=args.browser,
                     in_background=args.background,
-                    delete_first=args.delete_first
+                    dont_delete=args.dont_delete
                     )
 
 

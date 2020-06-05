@@ -56,10 +56,18 @@ To download the driver for your browser:
 **Easiest way to define config.yaml**: simply run autokijiji with --init:
 
 ```bash
-autokijiji --config /path/to/my/config.yaml
+autokijiji --init
 ```
 
-Optionally, you may create your own and pass it in as a command-line argument (--config) on the fly:
+It will by default save a _config.yaml_ file in the install directory.  
+
+You may edit this file at any time :
+
+```bash
+autokijiji --update_config
+```
+
+Optionally, you may create your own config anywhere and pass it in as an argument (--config) on the fly:
 
 ```bash
 autokijiji --config myconfig.yaml --ads ./some-item-to-sell
@@ -74,7 +82,8 @@ phone_number : 2897007082
 preferred_browser : firefox
 browser_driver_path : /path/to/your/browser/driver
 ```
-  
+Currently supported browsers are 'firefox' and 'chrome'.
+
 ## Example: Let's Sell Some Hiking Boots!
 
 ### Logging In to Kijiji
@@ -112,6 +121,14 @@ Assuming you've set the config.yaml file (if not, see above) let's post the exam
 
 ```bash
 autokijiji --ads ./example_ad_hiking_boots 
+```
+
+This will open up a browser in real-time in front of you.  
+
+Let's run it in the background:
+
+```bash
+autokijiji --ads ./example_ad_hiking_boots --background
 ```
 
 **Uploading Multiple Ads**: Simply pass in multiple arguments for --ad_dirs:
