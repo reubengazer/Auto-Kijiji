@@ -78,7 +78,7 @@ The config.yaml file looks like this:
 ```yaml
 kijiji_post_ad_url : https://www.kijiji.ca/p-admarkt-post-ad.html?
 kijiji_my_ads_url : https://www.kijiji.ca/m-my-ads/active
-phone_number : 2897007082
+phone_number : 1234567890
 preferred_browser : firefox
 browser_driver_path : /path/to/your/browser/driver
 ```
